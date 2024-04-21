@@ -6,7 +6,16 @@ import { envs } from './config'
 async function bootstrap() {
   const logger = new Logger('PaymentsBootstrap')
 
-  const app = await NestFactory.create(AppModule)
+  const app = await NestFactory.create(AppModule, {
+    rawBody: true
+  })
+
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true
+    })
+  )
   await app.listen(3000)
 
   // const app = await NestFactory.createMicroservice<MicroserviceOptions>(
@@ -18,13 +27,6 @@ async function bootstrap() {
   //     }
   //   }
   // )
-
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true,
-      forbidNonWhitelisted: true
-    })
-  )
 
   logger.log(`Payments microservice is running on port: ${envs.port}`)
 }

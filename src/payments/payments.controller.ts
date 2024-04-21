@@ -1,13 +1,20 @@
-import { Controller, Get, Post } from '@nestjs/common'
+import { Body, Controller, Get, Post, Req, Res } from '@nestjs/common'
 import { PaymentsService } from './payments.service'
+import { PaymentSessionDto } from './dto'
+import { Request, Response } from 'express'
 
 @Controller('payments')
 export class PaymentsController {
   constructor(private readonly paymentsService: PaymentsService) {}
 
   @Post('create-session')
-  createPaymentSession() {
-    return this.paymentsService.createPaymentSession()
+  createPaymentSession(@Body() paymentSessionDto: PaymentSessionDto) {
+    return this.paymentsService.createPaymentSession(paymentSessionDto)
+  }
+
+  @Post('webhook')
+  stripeWebhook(@Req() req: Request, @Res() res: Response) {
+    return this.paymentsService.stripeWebhook(req, res)
   }
 
   @Get('success')
@@ -18,10 +25,5 @@ export class PaymentsController {
   @Get('cancel')
   cancel() {
     return this.paymentsService.cancel()
-  }
-
-  @Post('webhook')
-  stripeWebhook() {
-    return this.paymentsService.stripeWebhook()
   }
 }
