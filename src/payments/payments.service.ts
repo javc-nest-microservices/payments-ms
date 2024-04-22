@@ -9,7 +9,7 @@ export class PaymentsService {
   private readonly stripe = new Stripe(envs.stripeSecret, {})
 
   async createPaymentSession(paymentSessionDto: PaymentSessionDto) {
-    const { currency, items } = paymentSessionDto
+    const { currency, items, orderId } = paymentSessionDto
 
     const lineItems = items.map((item) => ({
       price_data: {
@@ -25,7 +25,9 @@ export class PaymentsService {
     const session = await this.stripe.checkout.sessions.create({
       // add here my orderId
       payment_intent_data: {
-        metadata: {}
+        metadata: {
+          orderId: orderId
+        }
       },
       line_items: lineItems,
       mode: 'payment',
@@ -54,8 +56,12 @@ export class PaymentsService {
     const sig = req.headers['stripe-signature']
 
     let event: Stripe.Event
-    const endpointSecret =
-      'whsec_195a53b38bfc66ea1cc1fc738b75bf4e347f33f1d2020fd5deb5a16d8f441e0b'
+    // Testing
+    // const endpointSecret =
+    //   'whsec_195a53b38bfc66ea1cc1fc738b75bf4e347f33f1d2020fd5deb5a16d8f441e0b'
+
+    // Real Signing secret
+    const endpointSecret = 'whsec_jUFwnlVGEWQnX1eLQZq9spAExpbJ7Kc5'
     try {
       event = this.stripe.webhooks.constructEvent(
         req['rawBody'],
@@ -69,8 +75,13 @@ export class PaymentsService {
 
     switch (event.type) {
       case 'charge.succeeded':
+        const chargeSucceeded = event.data.object
+
         // Payment was successful
-        console.log(event)
+        console.log({
+          orderId: chargeSucceeded.metadata.orderId,
+          metadata: chargeSucceeded.metadata
+        })
         break
       default:
         console.log(`Unhandled event type: ${event.type}`)
