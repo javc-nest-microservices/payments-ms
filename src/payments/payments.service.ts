@@ -31,8 +31,8 @@ export class PaymentsService {
       },
       line_items: lineItems,
       mode: 'payment',
-      success_url: 'http://localhost:3000/payments/success',
-      cancel_url: 'http://localhost:3000/cancel/success'
+      success_url: envs.stripeSuccessUrl,
+      cancel_url: envs.stripeCancelUrl
     })
 
     return session
@@ -60,8 +60,8 @@ export class PaymentsService {
     // const endpointSecret =
     //   'whsec_195a53b38bfc66ea1cc1fc738b75bf4e347f33f1d2020fd5deb5a16d8f441e0b'
 
-    // Real Signing secret
-    const endpointSecret = 'whsec_jUFwnlVGEWQnX1eLQZq9spAExpbJ7Kc5'
+    const endpointSecret = envs.stripeEndpointSecret
+
     try {
       event = this.stripe.webhooks.constructEvent(
         req['rawBody'],
