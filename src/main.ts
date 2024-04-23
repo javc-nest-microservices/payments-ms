@@ -18,12 +18,19 @@ async function bootstrap() {
     })
   )
 
-  app.connectMicroservice<MicroserviceOptions>({
-    transport: Transport.NATS,
-    options: {
-      servers: envs.natsServers
+  app.connectMicroservice<MicroserviceOptions>(
+    {
+      transport: Transport.NATS,
+      options: {
+        servers: envs.natsServers
+      }
+    },
+    {
+      // * https://docs.nestjs.com/faq/hybrid-application#sharing-configuration
+      // ! This is necessary to hybrid applications be able to apply class-validator and class-transformer decorators
+      inheritAppConfig: true
     }
-  })
+  )
 
   await app.startAllMicroservices()
 
